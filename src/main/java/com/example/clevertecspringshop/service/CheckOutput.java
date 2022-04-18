@@ -9,10 +9,9 @@ import com.example.clevertecspringshop.repository.ReceiptRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -36,8 +35,10 @@ public class CheckOutput {
         int count = 0;
         for (Receipt products : receiptRepository.findAll()) {
             Optional<Product> stock = productRepository.findById(products.getId());
-            if (stock.get().getStock() == 1) {
-                count++;
+            if(stock.isPresent()) {
+                if (stock.get().getStock() == 1) {
+                    count++;
+                }
             }
         }
         return count;
@@ -50,9 +51,11 @@ public class CheckOutput {
                     * ((100 - discount)) / 100).setScale(2, RoundingMode.HALF_UP).doubleValue());
         }
     }
-    public void print(Integer numberCard) {
-        File output = new File("output");
-        try (PrintWriter pw = new PrintWriter(output)) {
+    public void print(Integer numberCard){
+//        BufferedWriter writer = new BufferedWriter();
+
+
+        try (PrintWriter pw = new PrintWriter(ResourceUtils.getFile("classpath:output"))) {
             Card card = cardRepository.findByNumber(numberCard);
             pw.println("\t\t  $Clevertec company$");
             pw.println("\t\t NYC, Mayumi beach");
@@ -67,7 +70,6 @@ public class CheckOutput {
             discount(card.getDiscount(), totalSum, pw);
             pw.println("*****************************************");
             pw.println("\t\t\tThanks for a purchase!");
-            pw.flush();
         } catch (NullPointerException e) {
             System.out.println("Failed to determine the presented discount card");
         } catch (FileNotFoundException e) {

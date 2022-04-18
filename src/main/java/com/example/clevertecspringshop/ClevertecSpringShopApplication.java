@@ -20,9 +20,6 @@ import org.springframework.context.annotation.Bean;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ClevertecSpringShopApplication {
-    //    CardService cardService;
-//    ProductService productService;
-//    ReceiptService receiptService;
     ReceiptRepository receiptRepository;
     CardRepository cardRepository;
     ProductRepository productRepository;
@@ -35,7 +32,7 @@ public class ClevertecSpringShopApplication {
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
             CheckOutput check = new CheckOutput(receiptRepository, cardRepository, productRepository);
-            check.print(6666);
+            check.print(1111);
         };
     }
 }
