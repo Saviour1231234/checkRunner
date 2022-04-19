@@ -1,12 +1,11 @@
 package com.example.clevertecspringshop;
 
-import com.example.clevertecspringshop.repository.CardRepository;
-import com.example.clevertecspringshop.repository.ProductRepository;
-import com.example.clevertecspringshop.repository.ReceiptRepository;
 import com.example.clevertecspringshop.service.CardService;
-import com.example.clevertecspringshop.service.CheckOutput;
+import com.example.clevertecspringshop.check.CheckOutput;
 import com.example.clevertecspringshop.service.ProductService;
 import com.example.clevertecspringshop.service.ReceiptService;
+import com.example.clevertecspringshop.service.email.EmailSenderService;
+import com.example.clevertecspringshop.service.listeners.EventManager;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,12 +19,12 @@ import org.springframework.context.annotation.Bean;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ClevertecSpringShopApplication {
-    //    CardService cardService;
-//    ProductService productService;
-//    ReceiptService receiptService;
-    ReceiptRepository receiptRepository;
-    CardRepository cardRepository;
-    ProductRepository productRepository;
+
+        CardService cardService;
+        ProductService productService;
+        ReceiptService receiptService;
+        EmailSenderService emailSenderService;
+        EventManager eventManager;
 
     public static void main(String[] args) {
         SpringApplication.run(ClevertecSpringShopApplication.class, args);
@@ -34,7 +33,7 @@ public class ClevertecSpringShopApplication {
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
-            CheckOutput check = new CheckOutput(receiptRepository, cardRepository, productRepository);
+            CheckOutput check = new CheckOutput(cardService, productService, receiptService, eventManager,emailSenderService);
             check.print(6666);
         };
     }

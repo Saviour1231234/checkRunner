@@ -22,4 +22,38 @@ public class Receipt {
     private Integer id;
 
     private Integer quantity;
+
+
+    private Receipt(Builder builder) {
+        setId(builder.id);
+        setQuantity(builder.quantity);
+
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private Integer id;
+        private Integer quantity;
+
+
+        private Builder() {
+        }
+
+        public Builder id(Integer val) {
+            id = val;
+            return this;
+        }
+
+        public Builder quantity(Integer val) {
+            quantity = val;
+            return this;
+        }
+
+        public Receipt build() {
+            return new Receipt(this);
+        }
+    }
 }

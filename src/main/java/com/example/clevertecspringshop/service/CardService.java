@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public record CardService(CardRepository cardRepository) {
 
-    public Card findByNumber(Integer number) {
+    public Card findByCardNumber(Integer number) {
         return cardRepository.findByNumber(number);
     }
 }

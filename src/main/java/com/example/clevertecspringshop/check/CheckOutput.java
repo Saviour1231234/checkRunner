@@ -1,11 +1,13 @@
-package com.example.clevertecspringshop.service;
+package com.example.clevertecspringshop.check;
 
 import com.example.clevertecspringshop.entity.Card;
 import com.example.clevertecspringshop.entity.Product;
 import com.example.clevertecspringshop.entity.Receipt;
-import com.example.clevertecspringshop.repository.CardRepository;
-import com.example.clevertecspringshop.repository.ProductRepository;
-import com.example.clevertecspringshop.repository.ReceiptRepository;
+import com.example.clevertecspringshop.service.CardService;
+import com.example.clevertecspringshop.service.ProductService;
+import com.example.clevertecspringshop.service.ReceiptService;
+import com.example.clevertecspringshop.service.email.EmailSenderService;
+import com.example.clevertecspringshop.service.listeners.EventManager;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,7 +19,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 
 
@@ -25,19 +26,23 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CheckOutput {
 
-    ReceiptRepository receiptRepository;
-    CardRepository cardRepository;
-    ProductRepository productRepository;
+        CardService cardService;
+    ProductService productService;
+    ReceiptService receiptService;
+    EventManager eventManager;
+    EmailSenderService emailSenderService;
 
     LocalDate date = LocalDate.now();
     LocalTime time = LocalTime.now();
 
     public int stock() {
         int count = 0;
-        for (Receipt products : receiptRepository.findAll()) {
-            Optional<Product> stock = productRepository.findById(products.getId());
-            if (stock.get().getStock() == 1) {
-                count++;
+        for (Receipt products : receiptService.findAllReceipts()) {
+            Optional<Product> stock = productService.findByProductId(products.getId());
+            if(stock.isPresent()) {
+                if (stock.get().getStock() == 1) {
+                    count++;
+                }
             }
         }
         return count;
@@ -51,9 +56,9 @@ public class CheckOutput {
         }
     }
     public void print(Integer numberCard) {
-        File output = new File("output");
+        File output = new File("src/main/resources/output");
         try (PrintWriter pw = new PrintWriter(output)) {
-            Card card = cardRepository.findByNumber(numberCard);
+            Card card = cardService.findByCardNumber(numberCard);
             pw.println("\t\t  $Clevertec company$");
             pw.println("\t\t NYC, Mayumi beach");
             pw.println("\t\t   p. 8800-555-35-35 \n");
@@ -67,7 +72,7 @@ public class CheckOutput {
             discount(card.getDiscount(), totalSum, pw);
             pw.println("*****************************************");
             pw.println("\t\t\tThanks for a purchase!");
-            pw.flush();
+            eventManager.subscribe("print", emailSenderService);
         } catch (NullPointerException e) {
             System.out.println("Failed to determine the presented discount card");
         } catch (FileNotFoundException e) {
@@ -78,20 +83,24 @@ public class CheckOutput {
     public Double find(PrintWriter pw) {
         try {
             double totalSum = 0;
-            for (Receipt receiptList : receiptRepository.findAll()) {
-                Optional<Product> productInShop = productRepository.findById(receiptList.getId());
-                double sum = productInShop.get().getPrice() * receiptList.getQuantity();
-                String field = receiptList.getQuantity() + "\t\t" + productInShop.get().getName() + "\t\t\t\t" +
-                        productInShop.get().getPrice() + "\t" + sum;
-                if (stock() > 4 && productInShop.get().getStock() == 1) {
-                    pw.println(field);
-                    sum = productInShop.get().getPrice() * receiptList.getQuantity() * 0.9;
-                    pw.println("\t( \"" + productInShop.get().getName() + "\" promotion -10%)\t"
-                            + BigDecimal.valueOf(sum).setScale(2, RoundingMode.HALF_UP).doubleValue());
-                } else {
-                    pw.println(field);
+            for (Receipt receiptList : receiptService.findAllReceipts()) {
+                Optional<Product> productInShop = productService.findByProductId(receiptList.getId());
+
+                if (productInShop.isPresent()) {
+                    double sum = productInShop.get().getPrice() * receiptList.getQuantity();
+
+                    String field = receiptList.getQuantity() + "\t\t" + productInShop.get().getName() + "\t\t\t\t" +
+                            productInShop.get().getPrice() + "\t" + sum;
+                    if (stock() > 4 && productInShop.get().getStock() == 1) {
+                        pw.println(field);
+                        sum = productInShop.get().getPrice() * receiptList.getQuantity() * 0.9;
+                        pw.println("\t( \"" + productInShop.get().getName() + "\" promotion -10%)\t"
+                                + BigDecimal.valueOf(sum).setScale(2, RoundingMode.HALF_UP).doubleValue());
+                    } else {
+                        pw.println(field);
+                    }
+                    totalSum = totalSum + sum;
                 }
-                totalSum = totalSum + sum;
             }
             return totalSum;
         } catch (NullPointerException e) {
