@@ -1,9 +1,4 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5435/postgres
-    username: postgres
-    password: postgres
-    initialization-mode: always
   mail:
     host: smtp.gmail.com
     port: 587
@@ -13,10 +8,16 @@ spring:
     protocol: smtp
     properties:
       mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+      smtp:
+      auth: true
+      starttls:
+      enable: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5435/postgres
+    username: postgres
+    password: postgres
+    initialization-mode: always
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
