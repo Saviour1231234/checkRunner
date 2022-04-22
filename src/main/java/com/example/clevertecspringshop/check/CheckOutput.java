@@ -35,6 +35,14 @@ public class CheckOutput {
     LocalDate date = LocalDate.now();
     LocalTime time = LocalTime.now();
 
+    public void discount(Integer discount, Double totalSum, PrintWriter pw) {
+        if (discount != 0) {
+            pw.println("Discount on presented card\t\t" + discount + "%");
+            pw.println("Amount including discount\t\t" + BigDecimal.valueOf(totalSum
+                    * ((100 - discount)) / 100).setScale(2, RoundingMode.HALF_UP).doubleValue());
+        }
+    }
+
     public int stock() {
         int count = 0;
         for (Receipt products : receiptService.findAllReceipts()) {
@@ -46,14 +54,6 @@ public class CheckOutput {
             }
         }
         return count;
-    }
-
-    public void discount(Integer discount, Double totalSum, PrintWriter pw) {
-        if (discount != 0) {
-            pw.println("Discount on presented card\t\t" + discount + "%");
-            pw.println("Amount including discount\t\t" + BigDecimal.valueOf(totalSum
-                    * ((100 - discount)) / 100).setScale(2, RoundingMode.HALF_UP).doubleValue());
-        }
     }
     public void print(Integer numberCard) {
         File output = new File("src/main/resources/output");

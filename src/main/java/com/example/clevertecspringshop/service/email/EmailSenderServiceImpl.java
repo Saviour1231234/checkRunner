@@ -27,6 +27,11 @@ public class EmailSenderServiceImpl implements EmailSenderService {
         this.mailFrom = mailFrom;
     }
 
+    @Override
+    public void update(String eventType, String object) throws MailAuthenticationException {
+        sendEmail(eventType, object);
+    }
+
     public void sendEmail(String subject, String message) throws MailAuthenticationException {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setFrom(mailFrom);
@@ -38,10 +43,5 @@ public class EmailSenderServiceImpl implements EmailSenderService {
         } catch (MailException e) {
             throw new MailAuthenticationException("Authentication failed");
         }
-    }
-
-    @Override
-    public void update(String eventType, String object) throws MailAuthenticationException {
-        sendEmail(eventType, object);
     }
 }
