@@ -15,6 +15,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @Entity
+@Builder
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

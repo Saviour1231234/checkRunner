@@ -1,9 +1,6 @@
 package com.example.clevertecspringshop.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,6 +12,8 @@ import javax.persistence.Id;
 @Setter
 @ToString
 @Entity
+@AllArgsConstructor
+@Builder
 public class Receipt {
 
     @Id

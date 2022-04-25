@@ -6,6 +6,9 @@ import com.example.clevertecspringshop.entity.Receipt;
 import com.example.clevertecspringshop.repository.CardRepository;
 import com.example.clevertecspringshop.repository.ProductRepository;
 import com.example.clevertecspringshop.repository.ReceiptRepository;
+import com.example.clevertecspringshop.repository.dao.CardDao;
+import com.example.clevertecspringshop.repository.dao.ProductDao;
+import com.example.clevertecspringshop.repository.dao.ReceiptDao;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,17 +27,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CheckOutput {
 
-    ReceiptRepository receiptRepository;
-    CardRepository cardRepository;
-    ProductRepository productRepository;
+//    ReceiptRepository receiptRepository;
+//    CardRepository cardRepository;
+//    ProductRepository productRepository;
+        CardDao cardDao;
+        ProductDao productDao;
+        ReceiptDao receiptDao;
 
     LocalDate date = LocalDate.now();
     LocalTime time = LocalTime.now();
 
     public int stock() {
         int count = 0;
-        for (Receipt products : receiptRepository.findAll()) {
-            Optional<Product> stock = productRepository.findById(products.getId());
+        for (Receipt products : receiptDao.findAll()) {
+            Optional<Product> stock = Optional.ofNullable(productDao.findById(products.getId()));
             if(stock.isPresent()) {
                 if (stock.get().getStock() == 1) {
                     count++;
@@ -52,11 +58,9 @@ public class CheckOutput {
         }
     }
     public void print(Integer numberCard){
-//        BufferedWriter writer = new BufferedWriter();
-
-
-        try (PrintWriter pw = new PrintWriter(ResourceUtils.getFile("classpath:output"))) {
-            Card card = cardRepository.findByNumber(numberCard);
+        File output = new File("src/main/resources/output");
+        try (PrintWriter pw = new PrintWriter(output)) {
+            Card card = cardDao.findByNumber(numberCard);
             pw.println("\t\t  $Clevertec company$");
             pw.println("\t\t NYC, Mayumi beach");
             pw.println("\t\t   p. 8800-555-35-35 \n");
@@ -80,8 +84,8 @@ public class CheckOutput {
     public Double find(PrintWriter pw) {
         try {
             double totalSum = 0;
-            for (Receipt receiptList : receiptRepository.findAll()) {
-                Optional<Product> productInShop = productRepository.findById(receiptList.getId());
+            for (Receipt receiptList : receiptDao.findAll()) {
+                Optional<Product> productInShop = Optional.ofNullable(productDao.findById(receiptList.getId()));
                 double sum = productInShop.get().getPrice() * receiptList.getQuantity();
                 String field = receiptList.getQuantity() + "\t\t" + productInShop.get().getName() + "\t\t\t\t" +
                         productInShop.get().getPrice() + "\t" + sum;
